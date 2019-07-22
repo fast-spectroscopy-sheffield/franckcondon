@@ -79,7 +79,11 @@ if __name__ == '__main__':
     mmfcf.update()
     
     # do the fitting
+    import time
+    start = time.time()
     mmfcf.perform_fit()
+    end = time.time()
+    print('\ncomputation time: {0:.4f} seconds\n'.format(end-start))
     
     # look at the results
     mmfcf.print_result()
