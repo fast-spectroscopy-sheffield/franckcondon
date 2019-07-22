@@ -93,20 +93,24 @@ class MultiModeFCFitting(MultiModeFC):
         self.model = self.calculate_fc_progression(self.x, self.vib_energies, self.hr_params, self.energy_00, self.broadening)
         self.calculate_reorganisation_energy()
         
+    def check_initial_guess(self):
+        self.model = self.calculate_fc_progression(self.x, self.vib_energies, self.hr_params, self.energy_00, self.broadening)
+        self.plot_result()
+        
     def plot_result(self):
         fig, ax = self.plot_modes(self.x, self.model, self.vib_energies, self.hr_params, self.energy_00, self.broadening)
         ax.plot(self.x, self.scaling_factor*self.y, 'r-', zorder=0)
     
     def print_result(self):
-        print('parameters\n')
-        print('scaling factor: {0:.3f}'.format(self.scaling_factor))
-        print('broadening: {0:.3f} eV'.format(self.broadening))
-        print('0-0 energy: {0:.3f} eV'.format(self.energy_00))
+        print('parameters (* - fitted)\n')
+        print('scaling factor: {0:.3f}{1}'.format(self.scaling_factor, '*' if self.fit_scaling_factor else ''))
+        print('broadening (eV): {0:.3f}{1}'.format(self.broadening, '*' if self.fit_broadening else ''))
+        print('0-0 energy (eV): {0:.3f}{1}'.format(self.energy_00, '*' if self.fit_energy_00 else ''))
         for index, S in enumerate(self.hr_params):
-            print('HR parameter {0}: {1:.3f}'.format(index, S))
+            print('HR parameter {0}: {1:.3f}{2}'.format(index, S, '*' if index in self.fit_hr_params else ''))
         for index, E_vib in enumerate(self.vib_energies):
-            print('vib energy {0}: {1:.3f}'.format(index, E_vib))
-        print('reorganisation energy: {0:.3f} eV'.format(self.E_reorg))
+            print('vib energy {0}: {1:.3f}{2}'.format(index, E_vib, '*' if index in self.fit_vibrational_energies else ''))
+        print('\nreorganisation energy (eV): {0:.3f}'.format(self.E_reorg))
         
     def calculate_reorganisation_energy(self):
         self.E_reorg = 0
@@ -126,27 +130,36 @@ if __name__ == '__main__':
     
     # do the calculation for the 4 modes
     mmfc = MultiModeFC()
-    mmfc.initialise(4)
+    mmfc.initialise(4)  # there are 4 modes
     model = mmfc.calculate_fc_progression(x, vib_energies, hr_params, energy_00, broadening)
     
-    # add some noise to the model to use as data
+    # add some noise to the model to use as test data
     y = model + np.random.normal(0, 0.03, len(x))
     
     # example of useage
     mmfcf = MultiModeFCFitting()
     
     # enter the data and parameters
+    scaling_factor = 20
     mmfcf.input_data(x, y)
     mmfcf.correct_for_phonon_dos()
-    mmfcf.input_parameters(vib_energies, hr_params, energy_00, broadening, 20)
-    mmfcf.initialise(4)
+    mmfcf.input_parameters(vib_energies, hr_params, energy_00, broadening, scaling_factor)
+    mmfcf.initialise(4)  # there are four modes
     
-    # do the fitting
+    # check initial guess with a plot if desired
+    mmfcf.check_initial_guess()
+    
+    # choose which parameters to fit
+    mmfcf.fit_broadening = False  # don't fit the broadening
+    mmfcf.fit_hr_params = 'all'  # fit all of the HR parameters
+    mmfcf.fit_vibrational_energies = [0, 2]  # fit the first and third vibrational energies
+    
+    # do the fitting and time it
     import time
     start = time.time()
     mmfcf.perform_fit()
     end = time.time()
-    print('\ncomputation time: {0:.4f} seconds'.format(end-start))
+    print('\ncomputation time: {0:.4f} seconds\n'.format(end-start))
     
     # look at the results
     mmfcf.print_result()
