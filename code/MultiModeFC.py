@@ -6,19 +6,11 @@ from itertools import product
 class MultiModeFC:
     
     def __init__(self):
-        self._initialise_params()
-
-    def _initialise_params(self):
-        self.hr_params = [0.67, 0.1, 0.52, 0.46]
-        self.vib_energies = [0.054, 0.089, 0.165, 0.188]
-        self.energy_00 = 3.050
-        self.broadening = 0.027
+        self.num_modes = None
         self.num_replicas = 6
-        self.update()
-        self.x = np.linspace(2.5, 3.1, 1000)
-        
-    def update(self):
-        self.num_modes = len(self.hr_params)
+
+    def initialise(self, num_modes):
+        self.num_modes = num_modes
         self._calculate_mi_permutations()
     
     @staticmethod
@@ -33,47 +25,60 @@ class MultiModeFC:
         p = product(range(self.num_replicas), repeat=self.num_modes)
         self._permutations = np.array(list(p))
     
-    def _calculate_vibrational_energy(self, m_i):
+    def _calculate_vibrational_energy(self, m_i, vib_energies):
         E_vib = 0
         for i in range(len(m_i)):
             m = m_i[i]
-            hw = self.vib_energies[i]
+            hw = vib_energies[i]
             E_vib += m*hw
         return E_vib
     
-    def _calculate_intensity(self, m_i):
+    def _calculate_intensity(self, m_i, hr_params):
         I = 1
         for i in range(len(m_i)):
             m = m_i[i]
-            S = self.hr_params[i]
+            S = hr_params[i]
             fcf = self._franck_condon_factor(S, m)
             I *= fcf
         return I
             
-    def _calculate_peak(self, m_i):
-        I = self._calculate_intensity(m_i)
-        E_vib = self._calculate_vibrational_energy(m_i)
-        peak = I*self._gaussian_lineshape(self.x, self.energy_00-E_vib, self.broadening)
+    def _calculate_peak(self, m_i, x, vib_energies, hr_params, energy_00, broadening):
+        I = self._calculate_intensity(m_i, hr_params)
+        E_vib = self._calculate_vibrational_energy(m_i, vib_energies)
+        peak = I*self._gaussian_lineshape(x, energy_00-E_vib, broadening)
         return peak
     
-    def calculate_fc_progression(self):
-        model = np.zeros_like(self.x)
-        self.peaks_to_plot = {}
-        for count, m_i in enumerate(self._permutations):
-            peak = self._calculate_peak(m_i)
-            if sum(m_i) <= 1:
-                self.peaks_to_plot[count] = peak
+    def calculate_fc_progression(self, x, vib_energies, hr_params, energy_00, broadening):
+        model = np.zeros_like(x)
+        for m_i in self._permutations:
+            peak = self._calculate_peak(m_i, x, vib_energies, hr_params, energy_00, broadening)
             model += peak
-        self.model = model
+        return model
+    
+    def plot_modes(self, x, model, vib_energies, hr_params, energy_00, broadening):
+        fig, ax = plt.subplots()
+        ax.plot(x, model, 'k-')
+        for m_i in self._permutations:
+            if sum(m_i) <= 1:
+                peak = self._calculate_peak(m_i, x, vib_energies, hr_params, energy_00, broadening)
+                ax.plot(x, peak)
+        ax.set_xlabel('energy (eV)')
+        ax.set_ylabel('PL (arb.)')
+        return fig, ax
  
        
 if __name__ == '__main__':
+    # setup parameters
+    hr_params = [0.67, 0.1, 0.52, 0.46]
+    vib_energies = [0.054, 0.089, 0.165, 0.188]
+    energy_00 = 3.050
+    broadening = 0.027
+    x = np.linspace(2.5, 3.1, 1000)
+    
+    # do the calculation for the 4 modes
     mmfc = MultiModeFC()
-    mmfc.calculate_fc_progression()
-    plt.figure()
-    plt.plot(mmfc.x, mmfc.model, 'k-')
-    for peak in mmfc.peaks_to_plot.values():
-        plt.plot(mmfc.x, peak)
-    plt.ylim([0, 1.3])
-    plt.xlabel('energy (eV)')
-    plt.ylabel('PL (arb.)')
+    mmfc.initialise(4)
+    model = mmfc.calculate_fc_progression(x, vib_energies, hr_params, energy_00, broadening)
+    
+    # plot the results
+    mmfc.plot_modes(x, model, vib_energies, hr_params, energy_00, broadening)
