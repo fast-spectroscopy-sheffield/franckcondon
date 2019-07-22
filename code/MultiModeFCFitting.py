@@ -13,6 +13,8 @@ class MultiModeFCFitting(MultiModeFC):
         self.fit_broadening = True
         self.fit_energy_00 = True
         self.fit_scaling_factor = True
+        self.algorithm = 'trf'
+        self.enforce_non_negativity = True
         
     def correct_for_phonon_dos(self):
         self.y /= (self.x*self.refractive_index)**3
@@ -87,7 +89,10 @@ class MultiModeFCFitting(MultiModeFC):
         mask = self._construct_parameters_tofit_mask()
         initial_guess = params[mask]
         params_tohold = params[np.invert(mask)]
-        fitted_params = least_squares(lambda params_tofit: self.calculate_residuals(params_tofit, params_tohold, mask), initial_guess, bounds=(0, np.inf)).x
+        if self.algorithm == 'lm' or not self.enforce_non_negativity:
+            fitted_params = least_squares(lambda params_tofit: self.calculate_residuals(params_tofit, params_tohold, mask), initial_guess, method=self.algorithm).x
+        else:
+            fitted_params = least_squares(lambda params_tofit: self.calculate_residuals(params_tofit, params_tohold, mask), initial_guess, method=self.algorithm, bounds=(0, np.inf)).x
         params = self._get_full_param_array(fitted_params, params_tohold, mask)
         self.scaling_factor, self.energy_00, self.broadening, self.vib_energies, self.hr_params = self._unpack_parameter_array(params)
         self.model = self.calculate_fc_progression(self.x, self.vib_energies, self.hr_params, self.energy_00, self.broadening)
