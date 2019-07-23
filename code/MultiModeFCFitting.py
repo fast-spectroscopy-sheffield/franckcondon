@@ -100,22 +100,30 @@ class MultiModeFCFitting(MultiModeFC):
         
     def check_initial_guess(self):
         self.model = self.calculate_fc_progression(self.x, self.vib_energies, self.hr_params, self.energy_00, self.broadening)
-        self.plot_result()
+        self.plot_result(save=False)
         
-    def plot_result(self):
+    def plot_result(self, save=True):
         fig, ax = self.plot_modes(self.x, self.model, self.vib_energies, self.hr_params, self.energy_00, self.broadening)
         ax.plot(self.x, self.scaling_factor*self.y, 'r-', zorder=0)
+        fig.savefig('fc_fit.png', format='png', dpi=300, bbox_inches='tight')
     
-    def print_result(self):
-        print('parameters (* - fitted)\n')
-        print('scaling factor: {0:.3f}{1}'.format(self.scaling_factor, '*' if self.fit_scaling_factor else ''))
-        print('broadening (eV): {0:.3f}{1}'.format(self.broadening, '*' if self.fit_broadening else ''))
-        print('0-0 energy (eV): {0:.3f}{1}'.format(self.energy_00, '*' if self.fit_energy_00 else ''))
+    def print_result(self, tofile=False):
+        if tofile:
+            f = open('fc_parameters.txt', 'w')
+            stream = f
+        else:
+            stream = None  # sys.stdout
+        print('parameters (* - fitted)\n', file=stream)
+        print('scaling factor: {0:.3f}{1}'.format(self.scaling_factor, '*' if self.fit_scaling_factor else ''), file=stream)
+        print('broadening (eV): {0:.3f}{1}'.format(self.broadening, '*' if self.fit_broadening else ''), file=stream)
+        print('0-0 energy (eV): {0:.3f}{1}'.format(self.energy_00, '*' if self.fit_energy_00 else ''), file=stream)
         for index, S in enumerate(self.hr_params):
-            print('HR parameter {0}: {1:.3f}{2}'.format(index, S, '*' if index in self.fit_hr_params else ''))
+            print('HR parameter {0}: {1:.3f}{2}'.format(index, S, '*' if index in self.fit_hr_params else ''), file=stream)
         for index, E_vib in enumerate(self.vib_energies):
-            print('vib energy {0}: {1:.3f}{2}'.format(index, E_vib, '*' if index in self.fit_vibrational_energies else ''))
-        print('\nreorganisation energy (eV): {0:.3f}'.format(self.E_reorg))
+            print('vib energy {0}: {1:.3f}{2}'.format(index, E_vib, '*' if index in self.fit_vibrational_energies else ''), file=stream)
+        print('\nreorganisation energy (eV): {0:.3f}'.format(self.E_reorg), file=stream)
+        if tofile:
+            f.close()
         
     def calculate_reorganisation_energy(self):
         self.E_reorg = 0
@@ -123,6 +131,16 @@ class MultiModeFCFitting(MultiModeFC):
             E_vib = self.vib_energies[i]
             S = self.hr_params[i]
             self.E_reorg += S*E_vib
+            
+    def save(self):
+        results = np.vstack((self.x, self.scaling_factor*self.y, self.model))
+        for m_i in self._permutations:
+            if sum(m_i) <= 1:
+                peak = self._calculate_peak(m_i, self.x, self.vib_energies, self.hr_params, self.energy_00, self.broadening)
+                results = np.vstack((results, peak))
+        np.savetxt('fc_fit.csv', np.transpose(results), delimiter=',', header='columns: energy (eV), data, fit, 0-0 and 0-1 peaks')
+        self.print_result(tofile=True)
+        
         
          
 if __name__ == '__main__':
@@ -168,4 +186,7 @@ if __name__ == '__main__':
     
     # look at the results
     mmfcf.print_result()
-    mmfcf.plot_result()
+    mmfcf.plot_result()  # saves the graph by default
+    
+    # save the data
+    mmfcf.save()  # the data, the fit, the 0-0 and 0-1 peaks and parameters

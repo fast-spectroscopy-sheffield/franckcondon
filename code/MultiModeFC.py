@@ -64,6 +64,7 @@ class MultiModeFC:
                 ax.plot(x, peak)
         ax.set_xlabel('energy (eV)')
         ax.set_ylabel('PL (arb.)')
+        ax.set_xlim([min(x), max(x)])
         return fig, ax
  
        
