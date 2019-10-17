@@ -1,4 +1,4 @@
-from MultiModeFC import MultiModeFC
+from franckcondon.MultiModeFC import MultiModeFC
 from scipy.optimize import least_squares
 import numpy as np
 
@@ -105,7 +105,8 @@ class MultiModeFCFitting(MultiModeFC):
     def plot_result(self, save=True):
         fig, ax = self.plot_modes(self.x, self.model, self.vib_energies, self.hr_params, self.energy_00, self.broadening)
         ax.plot(self.x, self.scaling_factor*self.y, 'r-', zorder=0)
-        fig.savefig('fc_fit.png', format='png', dpi=300, bbox_inches='tight')
+        if save:
+            fig.savefig('fc_fit.png', format='png', dpi=300, bbox_inches='tight')
     
     def print_result(self, tofile=False):
         if tofile:

@@ -6,6 +6,7 @@ from itertools import product
 class MultiModeFC:
     
     def __init__(self):
+        self.spectrum_type = 'pl'  # or 'abs'
         self.num_modes = None
         self.num_replicas = 6
 
@@ -45,7 +46,8 @@ class MultiModeFC:
     def _calculate_peak(self, m_i, x, vib_energies, hr_params, energy_00, broadening):
         I = self._calculate_intensity(m_i, hr_params)
         E_vib = self._calculate_vibrational_energy(m_i, vib_energies)
-        peak = I*self._gaussian_lineshape(x, energy_00-E_vib, broadening)
+        sign = 1 if self.spectrum_type == 'abs' else -1
+        peak = I*self._gaussian_lineshape(x, energy_00+(sign*E_vib), broadening)
         return peak
     
     def calculate_fc_progression(self, x, vib_energies, hr_params, energy_00, broadening):
@@ -63,7 +65,7 @@ class MultiModeFC:
                 peak = self._calculate_peak(m_i, x, vib_energies, hr_params, energy_00, broadening)
                 ax.plot(x, peak)
         ax.set_xlabel('energy (eV)')
-        ax.set_ylabel('PL (arb.)')
+        ax.set_ylabel('PL (arb.)' if self.spectrum_type == 'pl' else 'Absorbance (arb.)')
         ax.set_xlim([min(x), max(x)])
         return fig, ax
  
