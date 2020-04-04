@@ -16,6 +16,7 @@ broadening = 0.027
 
 # example of useage
 mmfcf = MultiModeFCFitting()
+mmfcf.spectrum_type = 'pl'  # 'pl' or 'abs'
 
 # enter the data and parameters
 scaling_factor = 150
