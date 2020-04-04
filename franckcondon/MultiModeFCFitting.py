@@ -6,7 +6,7 @@ import numpy as np
 class MultiModeFCFitting(MultiModeFC):
     
     def __init__(self):
-        super(MultiModeFCFitting, self).__init__()
+        super().__init__()
         self.refractive_index = 1
         self.fit_vibrational_energies = 'None'
         self.fit_hr_params = 'all'
