@@ -1,4 +1,4 @@
-from franckcondon.MultiModeFCFitting import MultiModeFCFitting
+from franckcondon import MultiModeFCFitting
 
 
 import pandas as pd
@@ -44,4 +44,4 @@ mmfcf.print_result(tofile=False)
 mmfcf.plot_result(save=False)  # saves the graph by default
 
 # save the data
-mmfcf.save()  # the data, the fit, the 0-0 and 0-1 peaks and parameters
+#mmfcf.save()  # the data, the fit, the 0-0 and 0-1 peaks and parameters
