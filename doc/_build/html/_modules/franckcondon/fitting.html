@@ -1,0 +1,362 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>franckcondon.fitting &#8212; franckcondon  documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">franckcondon  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for franckcondon.fitting</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">franckcondon.calculation</span> <span class="kn">import</span> <span class="n">MultiModeFC</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">least_squares</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="MultiModeFCFitting"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting">[docs]</a><span class="k">class</span> <span class="nc">MultiModeFCFitting</span><span class="p">(</span><span class="n">MultiModeFC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for fitting Franck-Condon progressions to experimental data.</span>
+<span class="sd">    </span>
+<span class="sd">    Refer to the examples for more detailed guidelines.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spectrum_type : str </span>
+<span class="sd">        either &#39;pl&#39; (photoluminescence) or &#39;abs&#39; (absorption)</span>
+<span class="sd">    num_modes : int</span>
+<span class="sd">        the number of vibrational modes to be included</span>
+<span class="sd">    num_replicas : int</span>
+<span class="sd">        the number of vibronic replicas to be calculated</span>
+<span class="sd">    refractive_index : int</span>
+<span class="sd">        refractive index of the surroundings (arbitrary in practice)</span>
+<span class="sd">    fit_vibrational_energies : {str, list[int]}</span>
+<span class="sd">        how many vibrational energies to fit. Either &#39;all&#39;, &#39;None&#39; or a list of indicies</span>
+<span class="sd">    fit_hr_params : {str, list[int]}</span>
+<span class="sd">        how many Huang-Rhys parameters to fit. Either &#39;all&#39;, &#39;None&#39; or a list of indicies</span>
+<span class="sd">    fit_broadening : book</span>
+<span class="sd">        whether to fit the linewidth</span>
+<span class="sd">    fit_energy_00 : bool</span>
+<span class="sd">        whether to fit the energy of the 0-0 transition</span>
+<span class="sd">    fit_scaling_factor :bool</span>
+<span class="sd">        whether to fit the scaling factor (highly recommended)</span>
+<span class="sd">    algorithm : str</span>
+<span class="sd">        least_squares algorithm to use (see scipy.optimize.least_squares)</span>
+<span class="sd">    enforce_non_negativity : bool</span>
+<span class="sd">        whether to force all fitted parameters to have positive values (recommended)</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise MultiModeFCFitting.</span>
+<span class="sd">        </span>
+<span class="sd">        By default everything except vibrational energies ae fitted. The</span>
+<span class="sd">        algorithm is trf and non-negativity is enforced.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refractive_index</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_vibrational_energies</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_hr_params</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_broadening</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_energy_00</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_scaling_factor</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="s1">&#39;trf&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enforce_non_negativity</span> <span class="o">=</span> <span class="kc">True</span>
+        
+<div class="viewcode-block" id="MultiModeFCFitting.correct_for_phonon_dos"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.correct_for_phonon_dos">[docs]</a>    <span class="k">def</span> <span class="nf">correct_for_phonon_dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Correct the experimental data for the phonon density of states.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">/=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">refractive_index</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span></div>
+        
+<div class="viewcode-block" id="MultiModeFCFitting.input_data"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.input_data">[docs]</a>    <span class="k">def</span> <span class="nf">input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the experimental data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : numpy.ndarray</span>
+<span class="sd">            1D array containing the energy values.</span>
+<span class="sd">        y : numpy.ndarray</span>
+<span class="sd">            1D array containing the spectrum values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span></div>
+        
+<div class="viewcode-block" id="MultiModeFCFitting.input_parameters"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.input_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">input_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vib_energies</span><span class="p">,</span> <span class="n">hr_params</span><span class="p">,</span> <span class="n">energy_00</span><span class="p">,</span> <span class="n">broadening</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the Franck-Condon parameters.</span>
+<span class="sd">        </span>
+<span class="sd">        They are either fixed or used as starting points for the fitting.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vib_energies : list[float]</span>
+<span class="sd">            The vibrational energies of the modes.</span>
+<span class="sd">        hr_params : list[float]</span>
+<span class="sd">            The Huang-Rhys parameters of the modes.</span>
+<span class="sd">        energy_00 : float</span>
+<span class="sd">            The energy of the 0-0 transition.</span>
+<span class="sd">        broadening : float</span>
+<span class="sd">            The linewidth broadening.</span>
+<span class="sd">        scaling_factor : float</span>
+<span class="sd">            A factor to scale the data in order to match the fit (which is </span>
+<span class="sd">            normalised to approximately 1)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span> <span class="o">=</span> <span class="n">vib_energies</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span> <span class="o">=</span> <span class="n">hr_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_00</span> <span class="o">=</span> <span class="n">energy_00</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">broadening</span> <span class="o">=</span> <span class="n">broadening</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">scaling_factor</span></div>
+        
+    <span class="k">def</span> <span class="nf">_create_tofit_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_vibrational_energies</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_vibrational_energies</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_vibrational_energies</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_vibrational_energies</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_modes</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_hr_params</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_hr_params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_hr_params</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_hr_params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_modes</span><span class="p">))</span>
+        
+    <span class="k">def</span> <span class="nf">_get_params_tofit_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_tofit</span><span class="p">):</span>
+        <span class="n">tofit</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="ow">in</span> <span class="n">list_tofit</span><span class="p">)</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_modes</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tofit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_construct_parameter_array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_00</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadening</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span><span class="p">])</span>
+    
+    <span class="k">def</span> <span class="nf">_construct_parameters_tofit_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">vib_energies_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_params_tofit_from_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_vibrational_energies</span><span class="p">)</span>
+        <span class="n">hr_params_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_params_tofit_from_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_hr_params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_scaling_factor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_energy_00</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_broadening</span><span class="p">,</span> <span class="o">*</span><span class="n">vib_energies_mask</span><span class="p">,</span> <span class="o">*</span><span class="n">hr_params_mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_calculate_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="n">scaling_factor</span><span class="p">,</span> <span class="n">energy_00</span><span class="p">,</span> <span class="n">broadening</span><span class="p">,</span> <span class="n">vib_energies</span><span class="p">,</span> <span class="n">hr_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_parameter_array</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_fc_progression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">vib_energies</span><span class="p">,</span> <span class="n">hr_params</span><span class="p">,</span> <span class="n">energy_00</span><span class="p">,</span> <span class="n">broadening</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">scaling_factor</span>
+    
+    <span class="k">def</span> <span class="nf">_unpack_parameter_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">energy_00</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">broadening</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">vib_energies</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">3</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">num_modes</span><span class="p">]</span>
+        <span class="n">hr_params</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">num_modes</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="n">scaling_factor</span><span class="p">,</span> <span class="n">energy_00</span><span class="p">,</span> <span class="n">broadening</span><span class="p">,</span> <span class="n">vib_energies</span><span class="p">,</span> <span class="n">hr_params</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params_tofit</span><span class="p">,</span> <span class="n">params_tohold</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_full_param_array</span><span class="p">(</span><span class="n">params_tofit</span><span class="p">,</span> <span class="n">params_tohold</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">scaling_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_model</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">scaling_factor</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">model</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_full_param_array</span><span class="p">(</span><span class="n">params_tofit</span><span class="p">,</span> <span class="n">params_tohold</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">b</span><span class="p">:</span>
+                <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">params_tofit</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+                <span class="n">f</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">params_tohold</span><span class="p">[</span><span class="n">h</span><span class="p">]</span>
+                <span class="n">h</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">params</span>
+            
+<div class="viewcode-block" id="MultiModeFCFitting.perform_fit"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.perform_fit">[docs]</a>    <span class="k">def</span> <span class="nf">perform_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Do the fitting.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_tofit_lists</span><span class="p">()</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_parameter_array</span><span class="p">()</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_parameters_tofit_mask</span><span class="p">()</span>
+        <span class="n">initial_guess</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">params_tohold</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">mask</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;lm&#39;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enforce_non_negativity</span><span class="p">:</span>
+            <span class="n">fitted_params</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="k">lambda</span> <span class="n">params_tofit</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_residuals</span><span class="p">(</span><span class="n">params_tofit</span><span class="p">,</span> <span class="n">params_tohold</span><span class="p">,</span> <span class="n">mask</span><span class="p">),</span> <span class="n">initial_guess</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="p">)</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fitted_params</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="k">lambda</span> <span class="n">params_tofit</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_residuals</span><span class="p">(</span><span class="n">params_tofit</span><span class="p">,</span> <span class="n">params_tohold</span><span class="p">,</span> <span class="n">mask</span><span class="p">),</span> <span class="n">initial_guess</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_full_param_array</span><span class="p">(</span><span class="n">fitted_params</span><span class="p">,</span> <span class="n">params_tohold</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_00</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadening</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack_parameter_array</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_fc_progression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_00</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadening</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reorganisation_energy</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="MultiModeFCFitting.check_initial_guess"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.check_initial_guess">[docs]</a>    <span class="k">def</span> <span class="nf">check_initial_guess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a plot showing the data and model.</span>
+<span class="sd">        </span>
+<span class="sd">        Useful for checking how good the initial parameter guess is.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_fc_progression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_00</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadening</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_result</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="MultiModeFCFitting.plot_result"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.plot_result">[docs]</a>    <span class="k">def</span> <span class="nf">plot_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a plot of the data and the fitted model.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        save : bool, optional</span>
+<span class="sd">            Whether to save the plot. If True, it will be saved to </span>
+<span class="sd">            **fc_fit.png**. The default is True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_modes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_00</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadening</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;fc_fit.png&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="MultiModeFCFitting.print_result"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.print_result">[docs]</a>    <span class="k">def</span> <span class="nf">print_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tofile</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the parameter values to console or file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tofile : bool, optional</span>
+<span class="sd">            If True the values are printed to file. If False they are printed </span>
+<span class="sd">            to console. The default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">tofile</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;fc_parameters.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># sys.stdout</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;parameters (* - fitted)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;scaling factor: </span><span class="si">{0:.3f}{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_scaling_factor</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;broadening (eV): </span><span class="si">{0:.3f}{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">broadening</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_broadening</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;0-0 energy (eV): </span><span class="si">{0:.3f}{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_00</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_energy_00</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">S</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;HR parameter </span><span class="si">{0}</span><span class="s1">: </span><span class="si">{1:.3f}{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_hr_params</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">E_vib</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;vib energy </span><span class="si">{0}</span><span class="s1">: </span><span class="si">{1:.3f}{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">E_vib</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_vibrational_energies</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">reorganisation energy (eV): </span><span class="si">{0:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_reorg</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tofile</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="MultiModeFCFitting.calculate_reorganisation_energy"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.calculate_reorganisation_energy">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_reorganisation_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the reorganisation energy based on the fitted parameters.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E_reorg</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_modes</span><span class="p">):</span>
+            <span class="n">E_vib</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_reorg</span> <span class="o">+=</span> <span class="n">S</span><span class="o">*</span><span class="n">E_vib</span></div>
+            
+<div class="viewcode-block" id="MultiModeFCFitting.save"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the fitted model.</span>
+<span class="sd">        </span>
+<span class="sd">        The total progression as well as the 0-0 and 0-1 contributions will be</span>
+<span class="sd">        saved to **fc_fit.csv**.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factor</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">m_i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permutations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">m_i</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">peak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_peak</span><span class="p">(</span><span class="n">m_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_00</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadening</span><span class="p">)</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">results</span><span class="p">,</span> <span class="n">peak</span><span class="p">))</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s1">&#39;fc_fit.csv&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">results</span><span class="p">),</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="s1">&#39;columns: energy (eV), data, fit, 0-0 and 0-1 peaks&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_result</span><span class="p">(</span><span class="n">tofile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">franckcondon  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, David Bossanyi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

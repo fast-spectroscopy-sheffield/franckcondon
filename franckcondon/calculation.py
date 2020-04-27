@@ -1,5 +1,3 @@
-"""A module for calculating multi-mode Franck-Condon progressions."""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from itertools import product
@@ -7,18 +5,18 @@ from itertools import product
 
 class MultiModeFC:
     """
-    Class for caculating Franck-Condon Progressions.
+    Class for calculating Franck-Condon Progressions.
     
     Refer to the examples for more detailed guidelines.
     
     Attributes
     ----------
-        spectrum_type : str 
-            either 'pl' (photoluminescence) or 'abs' (absorption)
-        num_modes : int
-            the number of vibrational modes to be included
-        num_replicas : int
-            the number of vibronic replicas to be calculated
+    spectrum_type : str 
+        either 'pl' (photoluminescence) or 'abs' (absorption)
+    num_modes : int
+        the number of vibrational modes to be included
+    num_replicas : int
+        the number of vibronic replicas to be calculated
         
     """
     
@@ -34,12 +32,12 @@ class MultiModeFC:
         
         Parameters
         ----------
-            num_modes : int
-                the number of vibrational modes to be included
+        num_modes : int
+            the number of vibrational modes to be included
             
         Returns
         -------
-            None.
+        None.
             
         """
         self.num_modes = num_modes
@@ -87,21 +85,21 @@ class MultiModeFC:
         
         Parameters
         ----------
-            x : numpy.ndarray
-                1D array containing the energy values to use in the calculation.
-            vib_energies : list[float]
-                The vibrational energies of the modes.
-            hr_params : list[float]
-                The Huang-Rhys parameters of the modes.
-            energy_00 : float
-                The energy of the 0-0 transition.
-            broadening : float
-                The linewidth broadening.
+        x : numpy.ndarray
+            1D array containing the energy values to use in the calculation.
+        vib_energies : list[float]
+            The vibrational energies of the modes.
+        hr_params : list[float]
+            The Huang-Rhys parameters of the modes.
+        energy_00 : float
+            The energy of the 0-0 transition.
+        broadening : float
+            The linewidth broadening.
             
         Returns
         -------
-            numpy.ndarray
-                1D array containing the calculated Franck-Condon progression.
+        numpy.ndarray
+            1D array containing the calculated Franck-Condon progression.
             
         """
         model = np.zeros_like(x)
@@ -116,23 +114,23 @@ class MultiModeFC:
         
         Parameters
         ----------
-            x : numpy.ndarray
-                1D array containing the energy values to use in the calculation.
-            vib_energies : list[float]
-                The vibrational energies of the modes.
-            hr_params : list[float]
-                The Huang-Rhys parameters of the modes.
-            energy_00 : float
-                The energy of the 0-0 transition.
-            broadening : float
-                The linewidth broadening.
+        x : numpy.ndarray
+            1D array containing the energy values to use in the calculation.
+        vib_energies : list[float]
+            The vibrational energies of the modes.
+        hr_params : list[float]
+            The Huang-Rhys parameters of the modes.
+        energy_00 : float
+            The energy of the 0-0 transition.
+        broadening : float
+            The linewidth broadening.
             
         Returns
         -------
-            matplotlib.pyplot.Figure
-                A figure handle for the generated plot.
-            matplotlib.pyplot.Axes
-                An axes object for the generated plot.
+        matplotlib.figure.Figure
+            A figure handle for the generated plot.
+        matplotlib.axes.Axes
+            An axes object for the generated plot.
             
         """
         fig, ax = plt.subplots()

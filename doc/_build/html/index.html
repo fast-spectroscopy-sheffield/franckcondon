@@ -1,0 +1,554 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Welcome to franckcondon’s documentation! &#8212; franckcondon  documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">franckcondon  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-franckcondon-s-documentation">
+<h1>Welcome to franckcondon’s documentation!<a class="headerlink" href="#welcome-to-franckcondon-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="calculations">
+<h1>Calculations<a class="headerlink" href="#calculations" title="Permalink to this headline">¶</a></h1>
+<p>Calculations are performed using the <strong>MultiModeFC</strong> class:</p>
+<dl class="class">
+<dt id="franckcondon.MultiModeFC">
+<em class="property">class </em><code class="sig-prename descclassname">franckcondon.</code><code class="sig-name descname">MultiModeFC</code><a class="reference internal" href="_modules/franckcondon/calculation.html#MultiModeFC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for calculating Franck-Condon Progressions.</p>
+<p>Refer to the examples for more detailed guidelines.</p>
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFC.spectrum_type">
+<code class="sig-name descname">spectrum_type</code><a class="headerlink" href="#franckcondon.MultiModeFC.spectrum_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>either ‘pl’ (photoluminescence) or ‘abs’ (absorption)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFC.num_modes">
+<code class="sig-name descname">num_modes</code><a class="headerlink" href="#franckcondon.MultiModeFC.num_modes" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of vibrational modes to be included</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFC.num_replicas">
+<code class="sig-name descname">num_replicas</code><a class="headerlink" href="#franckcondon.MultiModeFC.num_replicas" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of vibronic replicas to be calculated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFC.calculate_fc_progression">
+<code class="sig-name descname">calculate_fc_progression</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">vib_energies</em>, <em class="sig-param">hr_params</em>, <em class="sig-param">energy_00</em>, <em class="sig-param">broadening</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/calculation.html#MultiModeFC.calculate_fc_progression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFC.calculate_fc_progression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the multi-mode Franck-Condon progression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – 1D array containing the energy values to use in the calculation.</p></li>
+<li><p><strong>vib_energies</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The vibrational energies of the modes.</p></li>
+<li><p><strong>hr_params</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The Huang-Rhys parameters of the modes.</p></li>
+<li><p><strong>energy_00</strong> (<em>float</em>) – The energy of the 0-0 transition.</p></li>
+<li><p><strong>broadening</strong> (<em>float</em>) – The linewidth broadening.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>1D array containing the calculated Franck-Condon progression.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFC.initialise">
+<code class="sig-name descname">initialise</code><span class="sig-paren">(</span><em class="sig-param">num_modes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/calculation.html#MultiModeFC.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFC.initialise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the number of vibrational modes and calculate the permutations of vibrational quanta.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_modes</strong> (<em>int</em>) – the number of vibrational modes to be included</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFC.plot_modes">
+<code class="sig-name descname">plot_modes</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">model</em>, <em class="sig-param">vib_energies</em>, <em class="sig-param">hr_params</em>, <em class="sig-param">energy_00</em>, <em class="sig-param">broadening</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/calculation.html#MultiModeFC.plot_modes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFC.plot_modes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a plot showing the total Franck-Condon progression and mode-resolved 0-0 and 0-1 peaks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – 1D array containing the energy values to use in the calculation.</p></li>
+<li><p><strong>vib_energies</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The vibrational energies of the modes.</p></li>
+<li><p><strong>hr_params</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The Huang-Rhys parameters of the modes.</p></li>
+<li><p><strong>energy_00</strong> (<em>float</em>) – The energy of the 0-0 transition.</p></li>
+<li><p><strong>broadening</strong> (<em>float</em>) – The linewidth broadening.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>matplotlib.figure.Figure</em> – A figure handle for the generated plot.</p></li>
+<li><p><em>matplotlib.axes.Axes</em> – An axes object for the generated plot.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="fitting">
+<h1>Fitting<a class="headerlink" href="#fitting" title="Permalink to this headline">¶</a></h1>
+<p>Fitting is performed using the <strong>MultiModeFCFitting</strong> class:</p>
+<dl class="class">
+<dt id="franckcondon.MultiModeFCFitting">
+<em class="property">class </em><code class="sig-prename descclassname">franckcondon.</code><code class="sig-name descname">MultiModeFCFitting</code><a class="reference internal" href="_modules/franckcondon/fitting.html#MultiModeFCFitting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFCFitting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for fitting Franck-Condon progressions to experimental data.</p>
+<p>Refer to the examples for more detailed guidelines.</p>
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.spectrum_type">
+<code class="sig-name descname">spectrum_type</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.spectrum_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>either ‘pl’ (photoluminescence) or ‘abs’ (absorption)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.num_modes">
+<code class="sig-name descname">num_modes</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.num_modes" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of vibrational modes to be included</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.num_replicas">
+<code class="sig-name descname">num_replicas</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.num_replicas" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of vibronic replicas to be calculated</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.refractive_index">
+<code class="sig-name descname">refractive_index</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.refractive_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>refractive index of the surroundings (arbitrary in practice)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.fit_vibrational_energies">
+<code class="sig-name descname">fit_vibrational_energies</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.fit_vibrational_energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>how many vibrational energies to fit. Either ‘all’, ‘None’ or a list of indicies</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>{str, list[int]}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.fit_hr_params">
+<code class="sig-name descname">fit_hr_params</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.fit_hr_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>how many Huang-Rhys parameters to fit. Either ‘all’, ‘None’ or a list of indicies</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>{str, list[int]}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.fit_broadening">
+<code class="sig-name descname">fit_broadening</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.fit_broadening" title="Permalink to this definition">¶</a></dt>
+<dd><p>whether to fit the linewidth</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>book</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.fit_energy_00">
+<code class="sig-name descname">fit_energy_00</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.fit_energy_00" title="Permalink to this definition">¶</a></dt>
+<dd><p>whether to fit the energy of the 0-0 transition</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.fit_scaling_factor">
+<code class="sig-name descname">fit_scaling_factor</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.fit_scaling_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>whether to fit the scaling factor (highly recommended)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.algorithm">
+<code class="sig-name descname">algorithm</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.algorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>least_squares algorithm to use (see scipy.optimize.least_squares)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="franckcondon.MultiModeFCFitting.enforce_non_negativity">
+<code class="sig-name descname">enforce_non_negativity</code><a class="headerlink" href="#franckcondon.MultiModeFCFitting.enforce_non_negativity" title="Permalink to this definition">¶</a></dt>
+<dd><p>whether to force all fitted parameters to have positive values (recommended)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.calculate_fc_progression">
+<code class="sig-name descname">calculate_fc_progression</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">vib_energies</em>, <em class="sig-param">hr_params</em>, <em class="sig-param">energy_00</em>, <em class="sig-param">broadening</em><span class="sig-paren">)</span><a class="headerlink" href="#franckcondon.MultiModeFCFitting.calculate_fc_progression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the multi-mode Franck-Condon progression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – 1D array containing the energy values to use in the calculation.</p></li>
+<li><p><strong>vib_energies</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The vibrational energies of the modes.</p></li>
+<li><p><strong>hr_params</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The Huang-Rhys parameters of the modes.</p></li>
+<li><p><strong>energy_00</strong> (<em>float</em>) – The energy of the 0-0 transition.</p></li>
+<li><p><strong>broadening</strong> (<em>float</em>) – The linewidth broadening.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>1D array containing the calculated Franck-Condon progression.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.calculate_reorganisation_energy">
+<code class="sig-name descname">calculate_reorganisation_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/fitting.html#MultiModeFCFitting.calculate_reorganisation_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFCFitting.calculate_reorganisation_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the reorganisation energy based on the fitted parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.check_initial_guess">
+<code class="sig-name descname">check_initial_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/fitting.html#MultiModeFCFitting.check_initial_guess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFCFitting.check_initial_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a plot showing the data and model.</p>
+<p>Useful for checking how good the initial parameter guess is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.correct_for_phonon_dos">
+<code class="sig-name descname">correct_for_phonon_dos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/fitting.html#MultiModeFCFitting.correct_for_phonon_dos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFCFitting.correct_for_phonon_dos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Correct the experimental data for the phonon density of states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.initialise">
+<code class="sig-name descname">initialise</code><span class="sig-paren">(</span><em class="sig-param">num_modes</em><span class="sig-paren">)</span><a class="headerlink" href="#franckcondon.MultiModeFCFitting.initialise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the number of vibrational modes and calculate the permutations of vibrational quanta.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_modes</strong> (<em>int</em>) – the number of vibrational modes to be included</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.input_data">
+<code class="sig-name descname">input_data</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/fitting.html#MultiModeFCFitting.input_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFCFitting.input_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the experimental data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – 1D array containing the energy values.</p></li>
+<li><p><strong>y</strong> (<em>numpy.ndarray</em>) – 1D array containing the spectrum values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.input_parameters">
+<code class="sig-name descname">input_parameters</code><span class="sig-paren">(</span><em class="sig-param">vib_energies</em>, <em class="sig-param">hr_params</em>, <em class="sig-param">energy_00</em>, <em class="sig-param">broadening</em>, <em class="sig-param">scaling_factor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/fitting.html#MultiModeFCFitting.input_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFCFitting.input_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the Franck-Condon parameters.</p>
+<p>They are either fixed or used as starting points for the fitting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vib_energies</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The vibrational energies of the modes.</p></li>
+<li><p><strong>hr_params</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The Huang-Rhys parameters of the modes.</p></li>
+<li><p><strong>energy_00</strong> (<em>float</em>) – The energy of the 0-0 transition.</p></li>
+<li><p><strong>broadening</strong> (<em>float</em>) – The linewidth broadening.</p></li>
+<li><p><strong>scaling_factor</strong> (<em>float</em>) – A factor to scale the data in order to match the fit (which is
+normalised to approximately 1)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.perform_fit">
+<code class="sig-name descname">perform_fit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/fitting.html#MultiModeFCFitting.perform_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFCFitting.perform_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do the fitting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.plot_modes">
+<code class="sig-name descname">plot_modes</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">model</em>, <em class="sig-param">vib_energies</em>, <em class="sig-param">hr_params</em>, <em class="sig-param">energy_00</em>, <em class="sig-param">broadening</em><span class="sig-paren">)</span><a class="headerlink" href="#franckcondon.MultiModeFCFitting.plot_modes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a plot showing the total Franck-Condon progression and mode-resolved 0-0 and 0-1 peaks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – 1D array containing the energy values to use in the calculation.</p></li>
+<li><p><strong>vib_energies</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The vibrational energies of the modes.</p></li>
+<li><p><strong>hr_params</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The Huang-Rhys parameters of the modes.</p></li>
+<li><p><strong>energy_00</strong> (<em>float</em>) – The energy of the 0-0 transition.</p></li>
+<li><p><strong>broadening</strong> (<em>float</em>) – The linewidth broadening.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>matplotlib.figure.Figure</em> – A figure handle for the generated plot.</p></li>
+<li><p><em>matplotlib.axes.Axes</em> – An axes object for the generated plot.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.plot_result">
+<code class="sig-name descname">plot_result</code><span class="sig-paren">(</span><em class="sig-param">save=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/fitting.html#MultiModeFCFitting.plot_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFCFitting.plot_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a plot of the data and the fitted model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>save</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to save the plot. If True, it will be saved to
+<strong>fc_fit.png</strong>. The default is True.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.print_result">
+<code class="sig-name descname">print_result</code><span class="sig-paren">(</span><em class="sig-param">tofile=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/fitting.html#MultiModeFCFitting.print_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFCFitting.print_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the parameter values to console or file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tofile</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True the values are printed to file. If False they are printed
+to console. The default is False.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="franckcondon.MultiModeFCFitting.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/franckcondon/fitting.html#MultiModeFCFitting.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#franckcondon.MultiModeFCFitting.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the fitted model.</p>
+<p>The total progression as well as the 0-0 and 0-1 contributions will be
+saved to <strong>fc_fit.csv</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to franckcondon’s documentation!</a></li>
+<li><a class="reference internal" href="#calculations">Calculations</a></li>
+<li><a class="reference internal" href="#fitting">Fitting</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">franckcondon  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, David Bossanyi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>

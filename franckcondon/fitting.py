@@ -1,5 +1,3 @@
-"""A module for fitting multi-mode Franck-Condon progressions to data."""
-
 from franckcondon.calculation import MultiModeFC
 from scipy.optimize import least_squares
 import numpy as np
@@ -13,23 +11,29 @@ class MultiModeFCFitting(MultiModeFC):
     
     Attributes
     ----------
-        refractive_index : int
-            refractive index of the surroundings (arbitrary in practice)
-        fit_vibrational_energies : {str, list[int]}
-            how many vibrational energies to fit. Either 'all', 'None' or a list of indicies
-        fit_hr_params : {str, list[int]}
-            how many Huang-Rhys parameters to fit. Either 'all', 'None' or a list of indicies
-        fit_broadening : book
-            whether to fit the linewidth
-        fit_energy_00 : bool
-            whether to fit the energy of the 0-0 transition
-        fit_scaling_factor :bool
-            whether to fit the scaling factor (highly recommended)
-        algorithm : str
-            least_squares algorithm to use (see scipy.optimize.least_squares)
-        enforce_non_negativity : bool
-            whether to force all fitted parameters to have positive values (recommended)
-        
+    spectrum_type : str 
+        either 'pl' (photoluminescence) or 'abs' (absorption)
+    num_modes : int
+        the number of vibrational modes to be included
+    num_replicas : int
+        the number of vibronic replicas to be calculated
+    refractive_index : int
+        refractive index of the surroundings (arbitrary in practice)
+    fit_vibrational_energies : {str, list[int]}
+        how many vibrational energies to fit. Either 'all', 'None' or a list of indicies
+    fit_hr_params : {str, list[int]}
+        how many Huang-Rhys parameters to fit. Either 'all', 'None' or a list of indicies
+    fit_broadening : book
+        whether to fit the linewidth
+    fit_energy_00 : bool
+        whether to fit the energy of the 0-0 transition
+    fit_scaling_factor :bool
+        whether to fit the scaling factor (highly recommended)
+    algorithm : str
+        least_squares algorithm to use (see scipy.optimize.least_squares)
+    enforce_non_negativity : bool
+        whether to force all fitted parameters to have positive values (recommended)
+    
     """
     
     def __init__(self):
@@ -54,7 +58,7 @@ class MultiModeFCFitting(MultiModeFC):
         
         Returns
         -------
-            None.
+        None.
             
         """
         self.y /= (self.x*self.refractive_index)**3
