@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 setup(
     name='franckcondon',
 
-    version='0.0.1',
+    version='0.0.2',
 
     description='Package for generalised Franck-Condon fitting.',
 

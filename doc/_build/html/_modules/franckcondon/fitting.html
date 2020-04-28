@@ -12,6 +12,7 @@
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
   </head><body>
@@ -32,12 +33,12 @@
           <div class="body" role="main">
             
   <h1>Source code for franckcondon.fitting</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">franckcondon.calculation</span> <span class="kn">import</span> <span class="n">MultiModeFC</span>
+<span></span><span class="kn">from</span> <span class="nn">franckcondon.model</span> <span class="kn">import</span> <span class="n">MultiModeFC</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">least_squares</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="MultiModeFCFitting"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting">[docs]</a><span class="k">class</span> <span class="nc">MultiModeFCFitting</span><span class="p">(</span><span class="n">MultiModeFC</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiModeFCFitting"><a class="viewcode-back" href="../../_pages/fitting.html#franckcondon.MultiModeFCFitting">[docs]</a><span class="k">class</span> <span class="nc">MultiModeFCFitting</span><span class="p">(</span><span class="n">MultiModeFC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for fitting Franck-Condon progressions to experimental data.</span>
 <span class="sd">    </span>
@@ -53,9 +54,9 @@
 <span class="sd">        the number of vibronic replicas to be calculated</span>
 <span class="sd">    refractive_index : int</span>
 <span class="sd">        refractive index of the surroundings (arbitrary in practice)</span>
-<span class="sd">    fit_vibrational_energies : {str, list[int]}</span>
+<span class="sd">    fit_vibrational_energies : str or list of int</span>
 <span class="sd">        how many vibrational energies to fit. Either &#39;all&#39;, &#39;None&#39; or a list of indicies</span>
-<span class="sd">    fit_hr_params : {str, list[int]}</span>
+<span class="sd">    fit_hr_params : str or list of int</span>
 <span class="sd">        how many Huang-Rhys parameters to fit. Either &#39;all&#39;, &#39;None&#39; or a list of indicies</span>
 <span class="sd">    fit_broadening : book</span>
 <span class="sd">        whether to fit the linewidth</span>
@@ -67,6 +68,36 @@
 <span class="sd">        least_squares algorithm to use (see scipy.optimize.least_squares)</span>
 <span class="sd">    enforce_non_negativity : bool</span>
 <span class="sd">        whether to force all fitted parameters to have positive values (recommended)</span>
+<span class="sd">    </span>
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    franckcondon.MultiModeFC : calculating progressions</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; data = pd.read_csv(&#39;example_data.csv&#39;, header=None, index_col=0, squeeze=True)</span>
+<span class="sd">    &gt;&gt;&gt; x = data.index.values</span>
+<span class="sd">    &gt;&gt;&gt; y = data.values</span>
+<span class="sd">    &gt;&gt;&gt; hr_params = [1, 0.5]</span>
+<span class="sd">    &gt;&gt;&gt; vib_energies = [0.19, 0.067]</span>
+<span class="sd">    &gt;&gt;&gt; energy_00 = 3.77</span>
+<span class="sd">    &gt;&gt;&gt; broadening = 0.027</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf = MultiModeFCFitting()</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.spectrum_type = &#39;pl&#39;</span>
+<span class="sd">    &gt;&gt;&gt; scaling_factor = 150</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.input_data(x, y)</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.correct_for_phonon_dos()</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.input_parameters(vib_energies, hr_params, energy_00, broadening, scaling_factor)</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.initialise(2)  # there are two modes</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.check_initial_guess()</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.fit_broadening = True</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.fit_hr_params = &#39;all&#39;</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.fit_vibrational_energies = &#39;all&#39;</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.perform_fit()</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.print_result(tofile=False)</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.plot_result(save=False)</span>
+<span class="sd">    &gt;&gt;&gt; mmfcf.save()</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -87,7 +118,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="s1">&#39;trf&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enforce_non_negativity</span> <span class="o">=</span> <span class="kc">True</span>
         
-<div class="viewcode-block" id="MultiModeFCFitting.correct_for_phonon_dos"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.correct_for_phonon_dos">[docs]</a>    <span class="k">def</span> <span class="nf">correct_for_phonon_dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiModeFCFitting.correct_for_phonon_dos"><a class="viewcode-back" href="../../_pages/fitting.html#franckcondon.MultiModeFCFitting.correct_for_phonon_dos">[docs]</a>    <span class="k">def</span> <span class="nf">correct_for_phonon_dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Correct the experimental data for the phonon density of states.</span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
@@ -95,9 +126,10 @@
 <span class="sd">        None.</span>
 <span class="sd">            </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">/=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">refractive_index</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span></div>
+        <span class="n">exponent</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum_type</span> <span class="o">==</span> <span class="s1">&#39;abs&#39;</span> <span class="k">else</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">/=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">refractive_index</span><span class="p">)</span><span class="o">**</span><span class="n">exponent</span></div>
         
-<div class="viewcode-block" id="MultiModeFCFitting.input_data"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.input_data">[docs]</a>    <span class="k">def</span> <span class="nf">input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiModeFCFitting.input_data"><a class="viewcode-back" href="../../_pages/fitting.html#franckcondon.MultiModeFCFitting.input_data">[docs]</a>    <span class="k">def</span> <span class="nf">input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load the experimental data.</span>
 
@@ -116,7 +148,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span></div>
         
-<div class="viewcode-block" id="MultiModeFCFitting.input_parameters"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.input_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">input_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vib_energies</span><span class="p">,</span> <span class="n">hr_params</span><span class="p">,</span> <span class="n">energy_00</span><span class="p">,</span> <span class="n">broadening</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiModeFCFitting.input_parameters"><a class="viewcode-back" href="../../_pages/fitting.html#franckcondon.MultiModeFCFitting.input_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">input_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vib_energies</span><span class="p">,</span> <span class="n">hr_params</span><span class="p">,</span> <span class="n">energy_00</span><span class="p">,</span> <span class="n">broadening</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load the Franck-Condon parameters.</span>
 <span class="sd">        </span>
@@ -124,9 +156,9 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        vib_energies : list[float]</span>
+<span class="sd">        vib_energies : list of float</span>
 <span class="sd">            The vibrational energies of the modes.</span>
-<span class="sd">        hr_params : list[float]</span>
+<span class="sd">        hr_params : list of float</span>
 <span class="sd">            The Huang-Rhys parameters of the modes.</span>
 <span class="sd">        energy_00 : float</span>
 <span class="sd">            The energy of the 0-0 transition.</span>
@@ -200,7 +232,7 @@
                 <span class="n">h</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">params</span>
             
-<div class="viewcode-block" id="MultiModeFCFitting.perform_fit"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.perform_fit">[docs]</a>    <span class="k">def</span> <span class="nf">perform_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiModeFCFitting.perform_fit"><a class="viewcode-back" href="../../_pages/fitting.html#franckcondon.MultiModeFCFitting.perform_fit">[docs]</a>    <span class="k">def</span> <span class="nf">perform_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Do the fitting.</span>
 
@@ -223,7 +255,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_fc_progression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_00</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadening</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reorganisation_energy</span><span class="p">()</span></div>
         
-<div class="viewcode-block" id="MultiModeFCFitting.check_initial_guess"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.check_initial_guess">[docs]</a>    <span class="k">def</span> <span class="nf">check_initial_guess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiModeFCFitting.check_initial_guess"><a class="viewcode-back" href="../../_pages/fitting.html#franckcondon.MultiModeFCFitting.check_initial_guess">[docs]</a>    <span class="k">def</span> <span class="nf">check_initial_guess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a plot showing the data and model.</span>
 <span class="sd">        </span>
@@ -237,7 +269,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_fc_progression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib_energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_00</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadening</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_result</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
         
-<div class="viewcode-block" id="MultiModeFCFitting.plot_result"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.plot_result">[docs]</a>    <span class="k">def</span> <span class="nf">plot_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiModeFCFitting.plot_result"><a class="viewcode-back" href="../../_pages/fitting.html#franckcondon.MultiModeFCFitting.plot_result">[docs]</a>    <span class="k">def</span> <span class="nf">plot_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a plot of the data and the fitted model.</span>
 <span class="sd">        </span>
@@ -257,7 +289,7 @@
         <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;fc_fit.png&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span></div>
     
-<div class="viewcode-block" id="MultiModeFCFitting.print_result"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.print_result">[docs]</a>    <span class="k">def</span> <span class="nf">print_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tofile</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiModeFCFitting.print_result"><a class="viewcode-back" href="../../_pages/fitting.html#franckcondon.MultiModeFCFitting.print_result">[docs]</a>    <span class="k">def</span> <span class="nf">print_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tofile</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print the parameter values to console or file.</span>
 
@@ -289,7 +321,7 @@
         <span class="k">if</span> <span class="n">tofile</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
         
-<div class="viewcode-block" id="MultiModeFCFitting.calculate_reorganisation_energy"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.calculate_reorganisation_energy">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_reorganisation_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiModeFCFitting.calculate_reorganisation_energy"><a class="viewcode-back" href="../../_pages/fitting.html#franckcondon.MultiModeFCFitting.calculate_reorganisation_energy">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_reorganisation_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the reorganisation energy based on the fitted parameters.</span>
 
@@ -304,7 +336,7 @@
             <span class="n">S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hr_params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">E_reorg</span> <span class="o">+=</span> <span class="n">S</span><span class="o">*</span><span class="n">E_vib</span></div>
             
-<div class="viewcode-block" id="MultiModeFCFitting.save"><a class="viewcode-back" href="../../index.html#franckcondon.MultiModeFCFitting.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiModeFCFitting.save"><a class="viewcode-back" href="../../_pages/fitting.html#franckcondon.MultiModeFCFitting.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the fitted model.</span>
 <span class="sd">        </span>

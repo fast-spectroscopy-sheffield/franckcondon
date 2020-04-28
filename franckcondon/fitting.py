@@ -1,4 +1,4 @@
-from franckcondon.calculation import MultiModeFC
+from franckcondon.model import MultiModeFC
 from scipy.optimize import least_squares
 import numpy as np
 
@@ -19,9 +19,9 @@ class MultiModeFCFitting(MultiModeFC):
         the number of vibronic replicas to be calculated
     refractive_index : int
         refractive index of the surroundings (arbitrary in practice)
-    fit_vibrational_energies : {str, list[int]}
+    fit_vibrational_energies : str or list of int
         how many vibrational energies to fit. Either 'all', 'None' or a list of indicies
-    fit_hr_params : {str, list[int]}
+    fit_hr_params : str or list of int
         how many Huang-Rhys parameters to fit. Either 'all', 'None' or a list of indicies
     fit_broadening : book
         whether to fit the linewidth
@@ -33,6 +33,36 @@ class MultiModeFCFitting(MultiModeFC):
         least_squares algorithm to use (see scipy.optimize.least_squares)
     enforce_non_negativity : bool
         whether to force all fitted parameters to have positive values (recommended)
+    
+    See Also
+    --------
+    franckcondon.MultiModeFC : calculating progressions
+    
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> data = pd.read_csv('example_data.csv', header=None, index_col=0, squeeze=True)
+    >>> x = data.index.values
+    >>> y = data.values
+    >>> hr_params = [1, 0.5]
+    >>> vib_energies = [0.19, 0.067]
+    >>> energy_00 = 3.77
+    >>> broadening = 0.027
+    >>> mmfcf = MultiModeFCFitting()
+    >>> mmfcf.spectrum_type = 'pl'
+    >>> scaling_factor = 150
+    >>> mmfcf.input_data(x, y)
+    >>> mmfcf.correct_for_phonon_dos()
+    >>> mmfcf.input_parameters(vib_energies, hr_params, energy_00, broadening, scaling_factor)
+    >>> mmfcf.initialise(2)  # there are two modes
+    >>> mmfcf.check_initial_guess()
+    >>> mmfcf.fit_broadening = True
+    >>> mmfcf.fit_hr_params = 'all'
+    >>> mmfcf.fit_vibrational_energies = 'all'
+    >>> mmfcf.perform_fit()
+    >>> mmfcf.print_result(tofile=False)
+    >>> mmfcf.plot_result(save=False)
+    >>> mmfcf.save()
     
     """
     
@@ -61,7 +91,8 @@ class MultiModeFCFitting(MultiModeFC):
         None.
             
         """
-        self.y /= (self.x*self.refractive_index)**3
+        exponent = 1 if self.spectrum_type == 'abs' else 3
+        self.y /= (self.x*self.refractive_index)**exponent
         
     def input_data(self, x, y):
         """
@@ -90,9 +121,9 @@ class MultiModeFCFitting(MultiModeFC):
 
         Parameters
         ----------
-        vib_energies : list[float]
+        vib_energies : list of float
             The vibrational energies of the modes.
-        hr_params : list[float]
+        hr_params : list of float
             The Huang-Rhys parameters of the modes.
         energy_00 : float
             The energy of the 0-0 transition.

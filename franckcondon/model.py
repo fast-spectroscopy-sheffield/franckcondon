@@ -18,6 +18,25 @@ class MultiModeFC:
     num_replicas : int
         the number of vibronic replicas to be calculated
         
+    See Also
+    --------
+    franckcondon.MultiModeFCFitting : fitting progressions to data
+    
+    Examples
+    --------
+    >>> from franckcondon import MultiModeFC
+    >>> hr_params = [0.67, 0.1, 0.52, 0.46]
+    >>> vib_energies = [0.054, 0.089, 0.165, 0.188]
+    >>> energy_00 = 3.050
+    >>> broadening = 0.027
+    >>> x = np.linspace(2.5, 3.1, 1000)
+    >>> mmfc = MultiModeFC()
+    >>> mmfc.spectrum_type = 'pl'
+    >>> mmfc.num_replicas = 5
+    >>> mmfc.initialise(4)
+    >>> model = mmfc.calculate_fc_progression(x, vib_energies, hr_params, energy_00, broadening)
+    >>> mmfc.plot_modes(x, model, vib_energies, hr_params, energy_00, broadening)
+        
     """
     
     def __init__(self):
@@ -87,9 +106,9 @@ class MultiModeFC:
         ----------
         x : numpy.ndarray
             1D array containing the energy values to use in the calculation.
-        vib_energies : list[float]
+        vib_energies : list of float
             The vibrational energies of the modes.
-        hr_params : list[float]
+        hr_params : list of float
             The Huang-Rhys parameters of the modes.
         energy_00 : float
             The energy of the 0-0 transition.
@@ -98,7 +117,7 @@ class MultiModeFC:
             
         Returns
         -------
-        numpy.ndarray
+        model : numpy.ndarray
             1D array containing the calculated Franck-Condon progression.
             
         """
@@ -116,9 +135,11 @@ class MultiModeFC:
         ----------
         x : numpy.ndarray
             1D array containing the energy values to use in the calculation.
-        vib_energies : list[float]
+        model : numpy.ndarray
+            1D array containing the calculated model from MultiModeFC.calculate_fc_progression
+        vib_energies : list of float
             The vibrational energies of the modes.
-        hr_params : list[float]
+        hr_params : list of float
             The Huang-Rhys parameters of the modes.
         energy_00 : float
             The energy of the 0-0 transition.
@@ -127,9 +148,9 @@ class MultiModeFC:
             
         Returns
         -------
-        matplotlib.figure.Figure
+        fig : matplotlib.figure.Figure
             A figure handle for the generated plot.
-        matplotlib.axes.Axes
+        ax : matplotlib.axes.Axes
             An axes object for the generated plot.
             
         """
