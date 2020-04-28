@@ -1,1 +1,2 @@
-from franckcondon.MultiModeFCFitting import MultiModeFCFitting
+from franckcondon.model import MultiModeFC
+from franckcondon.fitting import MultiModeFCFitting
