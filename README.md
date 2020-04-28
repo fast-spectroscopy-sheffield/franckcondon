@@ -18,4 +18,4 @@ from franckcondon import MultiModeFCFitting
 Take a look at **example.py** for intended usage.
 
 ### Documentation
-Open doc/\_build/html/index.rst in your browser.
+Open **doc/\_build/html/index.rst** in your browser.
