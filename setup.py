@@ -37,7 +37,7 @@ setup(
 
     keywords='optical spectroscopy',
 
-    packages=find_packages(exclude=['docs']),
+    packages=find_packages(exclude=['doc', 'examples']),
 
     python_requires='>=3.7',
 
