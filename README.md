@@ -19,3 +19,8 @@ Take a look at **example.py** for intended usage.
 
 ### Documentation
 Open **doc/\_build/html/index.html** in your browser.
+
+### Notes
+For PL spectra, a photon density of states correction has to be applied; phonon is just a misspelling in the code.
+
+Fitting should be done on an energy $x$-axis (not wavelength). Given that, please pre-apply the Jacobian correction to spectroscopic data, if required (intensity, PL, ...). It's not required for ratiometric data (absorbance, TA, ...). See, for example, [this paper](https://aip.scitation.org/doi/abs/10.1063/1.1372508) for details.
